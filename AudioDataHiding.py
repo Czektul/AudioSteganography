@@ -52,7 +52,7 @@ class Application(Frame):
         self.InfoButton.grid(row=2, column=1, sticky=W)
 
         self.LabelHiddenButton = Label(self.fileFrame, text="Read hidden message")
-        self.HiddenButton = Button(self.fileFrame, text="Chose file", command=lambda: self.odczytajukryte())
+        self.HiddenButton = Button(self.fileFrame, text="Chose file", command=lambda: self.read_hidden_data())
         self.LabelHiddenButton.grid(row=3, column=0, sticky=E)
         self.HiddenButton.grid(row=3, column=1, sticky=W)
         self.maxInfoLabel = Label(self.fileFrame, textvariable=self.maxInfoLabelText)
@@ -269,7 +269,7 @@ class Application(Frame):
             self.infolen = len(self.infoString)
         print(self.infoString)
 
-    def odczytajukryte(self):
+    def read_hidden_data(self):
         self.bytes_arr = []
         self.infoString = ''
         howManyCharsInfo = ''
@@ -283,22 +283,22 @@ class Application(Frame):
 
         frame = stegoFile.readframes(1)
         frame = int.from_bytes(frame, byteorder='big')
-        ukrytyBit = frame % 2
+        hiddenBit = frame % 2
 
-        if ukrytyBit == 0:
+        if hiddenBit == 0:
             print('\nInformation hidden with LSB')
 
             for i in range(0, 32):
                 frame = stegoFile.readframes(1)
                 frame = int.from_bytes(frame, byteorder='big')
-                ukrytyBit = frame % 2
-                howManyCharsInfo += str(ukrytyBit)
+                hiddenBit = frame % 2
+                howManyCharsInfo += str(hiddenBit)
 
             for i in range(0, 32):
                 frame = stegoFile.readframes(1)
                 frame = int.from_bytes(frame, byteorder='big')
-                ukrytyBit = frame % 2
-                howManyCharsExt += str(ukrytyBit)
+                hiddenBit = frame % 2
+                howManyCharsExt += str(hiddenBit)
 
             ext_len = int(howManyCharsExt, 2)
             info_len = int(howManyCharsInfo, 2)
@@ -307,16 +307,16 @@ class Application(Frame):
             for i in range(0, ext_len*8):
                 frame = stegoFile.readframes(1)
                 frame = int.from_bytes(frame, byteorder='big')
-                ukrytyBit = frame % 2
-                extBitString += str(ukrytyBit)
+                hiddenBit = frame % 2
+                extBitString += str(hiddenBit)
             self.information_ext = self.bits_to_ext(extBitString)
             frame = stegoFile.readframes(1)
 
             for i in range(0, info_len):
                 frame = stegoFile.readframes(1)
                 frame = int.from_bytes(frame, byteorder='big')
-                ukrytyBit = frame % 2
-                infoBitString += str(ukrytyBit)
+                hiddenBit = frame % 2
+                infoBitString += str(hiddenBit)
 
             for i in range(len(infoBitString)):
                 self.bytes_arr.append(infoBitString[i])
@@ -483,7 +483,7 @@ class Application(Frame):
                 data = self.frombits(bits).to_bytes(1, byteorder='big')
                 bits = ''
                 file_output.write(data)
-        print("information decoded")
+        print("information read")
         file_output.close()
 
     def compare_files(self):                 # debugging hidden data before and after steganography
